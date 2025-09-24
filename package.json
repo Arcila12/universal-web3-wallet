@@ -1,0 +1,71 @@
+{
+  "name": "universal-web3-wallet",
+  "version": "1.0.0",
+  "description": "A complete Web3 wallet browser extension implementing EIP-1193 standard with multi-network support, token management, and secure transaction signing",
+  "type": "module",
+  "main": "dist/background.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/UniversalWeb3Wallet.git"
+  },
+  "keywords": [
+    "web3",
+    "wallet",
+    "ethereum",
+    "browser-extension",
+    "eip-1193",
+    "metamask-compatible",
+    "defi",
+    "erc20",
+    "typescript",
+    "react"
+  ],
+  "author": "Universal Web3 Wallet Contributors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/UniversalWeb3Wallet/issues"
+  },
+  "homepage": "https://github.com/yourusername/UniversalWeb3Wallet#readme",
+  "dependencies": {
+    "@ant-design/icons": "^6.0.2",
+    "@metamask/eth-sig-util": "^8.2.0",
+    "antd": "^5.27.4",
+    "assert": "^2.1.0",
+    "bip39": "^3.1.0",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
+    "constants-browserify": "^1.0.0",
+    "crypto-browserify": "^3.12.1",
+    "crypto-js": "^4.2.0",
+    "ethers": "^6.15.0",
+    "events": "^3.3.0",
+    "https-browserify": "^1.0.0",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "url": "^0.11.4",
+    "util": "^0.12.5"
+  },
+  "devDependencies": {
+    "@types/bip39": "^2.4.2",
+    "@types/crypto-js": "^4.2.2",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.9",
+    "@types/webextension-polyfill": "^0.10.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "~5.6.3",
+    "vite": "^5.0.0",
+    "vite-plugin-web-extension": "^4.0.0",
+    "webextension-polyfill": "^0.10.0"
+  }
+}

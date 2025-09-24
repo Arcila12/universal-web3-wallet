@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test DApp - Universal Wallet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        button {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #40a9ff;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            background: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            border-left: 4px solid #1890ff;
+        }
+        .error {
+            border-left-color: #ff4d4f;
+            background: #fff2f0;
+        }
+        .success {
+            border-left-color: #52c41a;
+            background: #f6ffed;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Universal Wallet Test DApp</h1>
+    <p>这个页面用于测试Universal Wallet扩展的功能</p>
+
+    <div class="container">
+        <h3>1. 钱包检测</h3>
+        <button onclick="checkWallet()">检测钱包</button>
+        <div id="wallet-status" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h3>2. 连接钱包</h3>
+        <button onclick="connectWallet()">连接钱包</button>
+        <div id="connect-result" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h3>3. 获取账户</h3>
+        <button onclick="getAccounts()" id="getAccountsBtn" disabled>获取账户</button>
+        <div id="accounts-result" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h3>4. 获取网络信息</h3>
+        <button onclick="getChainId()" id="getChainBtn" disabled>获取Chain ID</button>
+        <div id="chain-result" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h3>5. 签名消息</h3>
+        <input type="text" id="messageInput" placeholder="输入要签名的消息" value="Hello Universal Wallet!" style="width: 300px; padding: 8px;">
+        <button onclick="signMessage()" id="signBtn" disabled>签名消息</button>
+        <div id="sign-result" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h3>6. 发送交易</h3>
+        <button onclick="sendTransaction()" id="sendTxBtn" disabled>发送测试交易</button>
+        <div id="tx-result" class="result"></div>
+    </div>
+
+    <script>
+        let currentAccount = null;
+        let isConnected = false;
+
+        // 检测钱包
+        function checkWallet() {
+            const result = document.getElementById('wallet-status');
+
+            if (typeof window.ethereum !== 'undefined') {
+                result.className = 'result success';
+                result.textContent = `✅ 检测到以太坊钱包
+Provider: ${window.ethereum.isUniversalWallet ? 'Universal Wallet' : 'Other Wallet'}
+isMetaMask: ${window.ethereum.isMetaMask || false}
+isUniversalWallet: ${window.ethereum.isUniversalWallet || false}`;
+            } else {
+                result.className = 'result error';
+                result.textContent = '❌ 未检测到以太坊钱包\n请安装并启用Universal Wallet扩展';
+            }
+        }
+
+        // 连接钱包
+        async function connectWallet() {
+            const result = document.getElementById('connect-result');
+
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    throw new Error('请先安装Universal Wallet扩展');
+                }
+
+                // 请求连接
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                if (accounts.length > 0) {
+                    currentAccount = accounts[0];
+                    isConnected = true;
+
+                    // 启用其他按钮
+                    document.getElementById('getAccountsBtn').disabled = false;
+                    document.getElementById('getChainBtn').disabled = false;
+                    document.getElementById('signBtn').disabled = false;
+                    document.getElementById('sendTxBtn').disabled = false;
+
+                    result.className = 'result success';
+                    result.textContent = `✅ 连接成功！
+当前账户: ${currentAccount}
+账户数量: ${accounts.length}`;
+                } else {
+                    throw new Error('未获取到账户');
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ 连接失败: ${error.message}`;
+            }
+        }
+
+        // 获取账户
+        async function getAccounts() {
+            const result = document.getElementById('accounts-result');
+
+            try {
+                const accounts = await window.ethereum.request({
+                    method: 'eth_accounts'
+                });
+
+                result.className = 'result success';
+                result.textContent = `账户列表:
+${accounts.map((acc, index) => `${index + 1}. ${acc}`).join('\n')}`;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ 获取账户失败: ${error.message}`;
+            }
+        }
+
+        // 获取网络信息
+        async function getChainId() {
+            const result = document.getElementById('chain-result');
+
+            try {
+                const chainId = await window.ethereum.request({
+                    method: 'eth_chainId'
+                });
+
+                const networkVersion = await window.ethereum.request({
+                    method: 'net_version'
+                });
+
+                result.className = 'result success';
+                result.textContent = `网络信息:
+Chain ID: ${chainId} (${parseInt(chainId, 16)})
+Network Version: ${networkVersion}`;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ 获取网络信息失败: ${error.message}`;
+            }
+        }
+
+        // 签名消息
+        async function signMessage() {
+            const result = document.getElementById('sign-result');
+            const message = document.getElementById('messageInput').value;
+
+            if (!message) {
+                result.className = 'result error';
+                result.textContent = '❌ 请输入要签名的消息';
+                return;
+            }
+
+            try {
+                const signature = await window.ethereum.request({
+                    method: 'personal_sign',
+                    params: [message, currentAccount]
+                });
+
+                result.className = 'result success';
+                result.textContent = `✅ 签名成功！
+消息: ${message}
+签名: ${signature}`;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ 签名失败: ${error.message}`;
+            }
+        }
+
+        // 发送交易
+        async function sendTransaction() {
+            const result = document.getElementById('tx-result');
+
+            try {
+                const txParams = {
+                    from: currentAccount,
+                    to: currentAccount, // 发送给自己
+                    value: '0x0', // 0 ETH
+                    gasLimit: '0x5208', // 21000
+                };
+
+                const txHash = await window.ethereum.request({
+                    method: 'eth_sendTransaction',
+                    params: [txParams]
+                });
+
+                result.className = 'result success';
+                result.textContent = `✅ 交易发送成功！
+交易哈希: ${txHash}`;
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = `❌ 交易失败: ${error.message}`;
+            }
+        }
+
+        // 监听账户变化
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                console.log('账户已变化:', accounts);
+                if (accounts.length === 0) {
+                    isConnected = false;
+                    currentAccount = null;
+                    // 禁用按钮
+                    document.getElementById('getAccountsBtn').disabled = true;
+                    document.getElementById('getChainBtn').disabled = true;
+                    document.getElementById('signBtn').disabled = true;
+                    document.getElementById('sendTxBtn').disabled = true;
+                } else {
+                    currentAccount = accounts[0];
+                }
+            });
+
+            window.ethereum.on('chainChanged', (chainId) => {
+                console.log('网络已变化:', chainId);
+            });
+        }
+
+        // 页面加载时自动检测钱包
+        window.addEventListener('load', () => {
+            checkWallet();
+        });
+    </script>
+</body>
+</html>
