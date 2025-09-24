@@ -8,10 +8,16 @@
 [![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB)](https://reactjs.org/)
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-green?style=flat&logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/)
+[![EIP-1193](https://img.shields.io/badge/EIP--1193-Compatible-orange?style=flat)](https://eips.ethereum.org/EIPS/eip-1193)
+[![MetaMask](https://img.shields.io/badge/MetaMask-Alternative-ff6600?style=flat&logo=metamask&logoColor=white)](https://metamask.io/)
 
-**A complete Web3 wallet browser extension implementing EIP-1193 standard**
+**🚀 The Complete Web3 Wallet Browser Extension - MetaMask Alternative with Advanced Features**
 
-[🚀 Installation](#installation) • [📖 Documentation](#documentation) • [🤝 Contributing](#contributing) • [🔐 Security](#security)
+*Secure • Multi-Network • ERC-20 Ready • DeFi Optimized • Open Source*
+
+[🚀 Quick Install](#-installation) • [✨ Features](#-features) • [📖 Docs](#-documentation) • [🤝 Contribute](#-contributing) • [🔐 Security](#-security)
+
+**⭐ Star this repo** | **🍴 Fork & Contribute** | **📢 Share with Community**
 
 </div>
 
@@ -30,18 +36,22 @@
 
 ## ✨ Features
 
-### 🔐 **Core Wallet Features**
-- **EIP-1193 Provider**: Full compliance with Ethereum provider standard
-- **Mnemonic Support**: BIP39 12-word mnemonic phrase generation and import
-- **Multi-Account**: HD wallet with hierarchical deterministic account generation
-- **Account Import**: Import accounts via private keys
-- **Secure Storage**: AES encrypted local storage for keys and mnemonics
+> **Why Choose Universal Web3 Wallet?**
+> Built for the next generation of DeFi users who demand security, flexibility, and seamless multi-chain experiences.
 
-### 🌐 **Network Management**
-- **Multi-Network**: Ethereum mainnet and EVM-compatible networks
-- **Custom Networks**: Add and manage custom RPC endpoints
-- **Network Switching**: Seamless network switching with automatic balance updates
-- **MetaMask Compatible**: Works with existing DApp integrations
+### 🔐 **Core Wallet Features**
+- **🛡️ EIP-1193 Provider**: Full compliance with Ethereum provider standard - works with ALL DApps
+- **🔑 Mnemonic Support**: BIP39 12-word mnemonic phrase generation and import with entropy validation
+- **👥 Multi-Account**: HD wallet with hierarchical deterministic account generation (unlimited accounts)
+- **📥 Account Import**: Import accounts via private keys with security warnings
+- **🔒 Secure Storage**: Military-grade AES encryption for keys and mnemonics - never leaves your device
+
+### 🌐 **Multi-Chain Network Support**
+- **🌍 15+ Networks**: Ethereum, Polygon, BSC, Arbitrum, Optimism, Avalanche, Fantom + more
+- **⚙️ Custom Networks**: Add any EVM-compatible network with custom RPC endpoints
+- **⚡ Instant Switching**: Seamless network switching with automatic balance updates
+- **🦊 MetaMask Compatible**: Drop-in replacement - works with existing DApp integrations
+- **🔄 Auto-Detection**: Automatically detects and suggests network additions from DApps
 
 ### 💰 **Token Management**
 - **ERC-20 Tokens**: Add, remove, and manage custom tokens
