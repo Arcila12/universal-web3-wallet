@@ -340,7 +340,6 @@ function PopupContent() {
         accountAddress: currentAccount.address,
         chainId: walletState.network.chainId
       });
-
       if (response.success) {
         setTokens(response.tokens || []);
       }
@@ -411,7 +410,28 @@ function PopupContent() {
   };
 
   const handleRefreshAllTokenBalances = async (): Promise<void> => {
-    await loadTokens();
+    if (!walletState?.hasWallet || walletState.isLocked) return;
+
+    const currentAccount = walletState.accounts[walletState.currentAccountIndex];
+    if (!currentAccount) return;
+
+    try {
+      // 先刷新Token余额
+      const refreshResponse = await browser.runtime.sendMessage({
+        type: 'REFRESH_TOKEN_BALANCES',
+        accountAddress: currentAccount.address,
+        chainId: walletState.network.chainId
+      });
+
+      if (refreshResponse.success) {
+        // 然后重新加载Token数据以获取更新后的余额
+        await loadTokens();
+      } else {
+        console.error('Failed to refresh token balances:', refreshResponse.error);
+      }
+    } catch (err) {
+      console.error('Failed to refresh token balances:', err);
+    }
   };
 
   // Load tokens when wallet state changes

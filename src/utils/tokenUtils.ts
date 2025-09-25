@@ -60,9 +60,18 @@ const DEFAULT_RPC_CONFIGS: { [chainId: string]: string } = {
   // Testnets
   '0xaa36a7': 'https://ethereum-sepolia-rpc.publicnode.com', // Sepolia
   '0x13882': 'https://rpc.ankr.com/polygon_mumbai', // Mumbai
+  '0x61': 'https://data-seed-prebsc-1-s1.binance.org:8545', // BSC Testnet
 }
 
 export class TokenInfoFetcher {
+  // BSC Testnet备用RPC URLs
+  private BSC_TESTNET_RPCS = [
+    'https://data-seed-prebsc-1-s1.binance.org:8545',
+    'https://data-seed-prebsc-2-s1.binance.org:8545',
+    'https://bsc-testnet.public.blastapi.io',
+    'https://bsc-testnet-rpc.publicnode.com'
+  ]
+
   private getProvider(chainId: string, customRpcUrl?: string): ethers.JsonRpcProvider {
     const rpcUrl = customRpcUrl || DEFAULT_RPC_CONFIGS[chainId]
     if (!rpcUrl) {
@@ -72,13 +81,40 @@ export class TokenInfoFetcher {
     return new ethers.JsonRpcProvider(rpcUrl)
   }
 
+  private async getProviderWithFallback(chainId: string, customRpcUrl?: string): Promise<ethers.JsonRpcProvider> {
+    if (customRpcUrl) {
+      return new ethers.JsonRpcProvider(customRpcUrl)
+    }
+
+    // 对于BSC testnet，尝试多个RPC
+    if (chainId === '0x61') {
+      for (const rpcUrl of this.BSC_TESTNET_RPCS) {
+        try {
+          const provider = new ethers.JsonRpcProvider(rpcUrl)
+          // 测试连接
+          await provider.getBlockNumber()
+          console.log(`TokenInfoFetcher: Successfully connected to BSC testnet via ${rpcUrl}`)
+          return provider
+        } catch (error) {
+          console.warn(`TokenInfoFetcher: Failed to connect to ${rpcUrl}:`, error)
+          continue
+        }
+      }
+      throw new Error('All BSC testnet RPC URLs failed')
+    }
+
+    return this.getProvider(chainId, customRpcUrl)
+  }
+
   async getTokenInfo(
     tokenAddress: string,
     chainId: string,
     customRpcUrl?: string,
     timeout: number = 10000
   ): Promise<TokenInfo> {
+    console.log(`TokenInfoFetcher: Getting token info for ${tokenAddress} on chain ${chainId}`)
     if (!this.isValidAddress(tokenAddress)) {
+      console.warn(`TokenInfoFetcher: Invalid token address: ${tokenAddress}`)
       return {
         name: '',
         symbol: '',
@@ -88,8 +124,22 @@ export class TokenInfoFetcher {
     }
 
     try {
-      const provider = this.getProvider(chainId, customRpcUrl)
+      const provider = await this.getProviderWithFallback(chainId, customRpcUrl)
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, provider)
+
+      // 先检查合约是否存在
+      const code = await provider.getCode(tokenAddress)
+      if (code === '0x') {
+        console.warn(`TokenInfoFetcher: No contract found at address ${tokenAddress}`)
+        return {
+          name: '',
+          symbol: '',
+          decimals: 18,
+          isValid: false
+        }
+      }
+
+      console.log(`TokenInfoFetcher: Contract exists, fetching token info...`)
 
       // 设置超时
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -97,27 +147,38 @@ export class TokenInfoFetcher {
       })
 
       // 并行调用name, symbol, decimals
-      const [name, symbol, decimals] = await Promise.race([
+      const results = await Promise.race([
         Promise.all([
-          this.safeCall(contract.name),
-          this.safeCall(contract.symbol),
-          this.safeCall(contract.decimals)
+          this.safeCall(contract.name()),
+          this.safeCall(contract.symbol()),
+          this.safeCall(contract.decimals())
         ]),
         timeoutPromise
-      ]) as [string, string, number]
+      ])
+
+      const [name, symbol, decimals] = results as [string | null, string | null, bigint | null]
+
+      console.log(`TokenInfoFetcher: Retrieved data - name: ${name}, symbol: ${symbol}, decimals: ${decimals}`)
 
       // 验证获取到的数据
-      const isValid = Boolean(name && symbol && typeof decimals === 'number')
+      const validName = name || ''
+      const validSymbol = symbol || ''
+      const validDecimals = typeof decimals === 'bigint' ? Number(decimals) : 18
+
+      // 只有当name、symbol、decimals都成功获取到时，才认为是有效的
+      const isValid = name && symbol && typeof decimals === 'bigint' ? true : false
+
+      console.log(`TokenInfoFetcher: Token info - name: "${validName}", symbol: "${validSymbol}", decimals: ${validDecimals}, isValid: ${isValid}`)
 
       return {
-        name: name || '',
-        symbol: symbol || '',
-        decimals: typeof decimals === 'number' ? decimals : 18,
+        name: validName,
+        symbol: validSymbol,
+        decimals: validDecimals,
         isValid
       }
 
     } catch (error) {
-      console.error('Failed to fetch token info:', error)
+      console.error(`TokenInfoFetcher: Failed to fetch token info for ${tokenAddress}:`, error)
       return {
         name: '',
         symbol: '',

@@ -14,7 +14,7 @@
 # custom: ['https://your-custom-funding-url.com', 'https://another-funding-url.com']
 
 # Crypto funding options (examples):
-custom: ['https://donate.universal-web3-wallet.com']
+
 
 # Instructions for setup:
 # 1. Create a GitHub Sponsors account or other funding platform

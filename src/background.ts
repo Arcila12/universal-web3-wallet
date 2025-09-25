@@ -262,6 +262,10 @@ class BackgroundService {
           const popularTokens = this.tokenManager.getPopularTokens(message.chainId)
           return { success: true, tokens: popularTokens }
 
+        case 'REFRESH_TOKEN_BALANCES':
+          const balancesUpdated = await this.refreshTokenBalances(message.accountAddress, message.chainId)
+          return { success: balancesUpdated }
+
         // 权限管理
         case 'REVOKE_PERMISSIONS':
           // 清除连接权限（这里可以扩展为更详细的权限管理）
@@ -630,6 +634,105 @@ class BackgroundService {
       console.log('Universal Wallet: Broadcasted chainChanged:', chainId)
     } catch (error) {
       console.error('Universal Wallet: Failed to broadcast chainChanged:', error)
+    }
+  }
+
+  // 刷新指定账户的所有Token余额
+  private async refreshTokenBalances(accountAddress: string, chainId: string): Promise<boolean> {
+    try {
+      console.log('Background: Refreshing token balances for', accountAddress, 'on', chainId)
+
+      // 获取该账户在该链上的所有Token
+      const tokens = this.tokenManager.getTokens(accountAddress, chainId)
+
+      if (tokens.length === 0) {
+        console.log('Background: No tokens found for account')
+        return true
+      }
+
+      // 获取网络配置
+      const network = this.networkManager.getNetworkByChainId(chainId)
+      if (!network) {
+        console.error('Background: Network not found for chainId', chainId)
+        return false
+      }
+
+      // 并发查询所有Token余额
+      const balancePromises = tokens.map(token =>
+        this.getTokenBalance(accountAddress, token.address, network.rpcUrl)
+      )
+
+      const balances = await Promise.allSettled(balancePromises)
+
+      // 更新每个Token的余额
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i]
+        const balanceResult = balances[i]
+
+        if (balanceResult.status === 'fulfilled') {
+          const balance = balanceResult.value
+          await this.tokenManager.updateTokenBalance(accountAddress, chainId, token.address, balance)
+          console.log(`Background: Updated balance for ${token.symbol}: ${balance}`)
+        } else {
+          console.error(`Background: Failed to get balance for ${token.symbol}:`, balanceResult.reason)
+          // 余额查询失败时设置为 '0'
+          await this.tokenManager.updateTokenBalance(accountAddress, chainId, token.address, '0')
+        }
+      }
+
+      return true
+    } catch (error) {
+      console.error('Background: Error refreshing token balances:', error)
+      return false
+    }
+  }
+
+  // 获取ERC20 Token余额
+  private async getTokenBalance(accountAddress: string, tokenAddress: string, rpcUrl: string): Promise<string> {
+    try {
+      // ERC20 balanceOf 方法的函数选择器
+      const balanceOfSelector = '0x70a08231'
+      // 补齐地址到32字节
+      const paddedAddress = accountAddress.slice(2).padStart(64, '0')
+      const data = balanceOfSelector + paddedAddress
+
+      const response = await fetch(rpcUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'eth_call',
+          params: [
+            {
+              to: tokenAddress,
+              data: data
+            },
+            'latest'
+          ],
+          id: 1,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.error) {
+        throw new Error(result.error.message)
+      }
+
+      // 将十六进制结果转换为余额字符串
+      const balanceHex = result.result
+      if (!balanceHex || balanceHex === '0x') {
+        return '0'
+      }
+
+      // 转换为十进制字符串（保持原始精度）
+      const balanceWei = BigInt(balanceHex).toString()
+      return balanceWei
+    } catch (error) {
+      console.error('Background: Error fetching token balance:', error)
+      return '0'
     }
   }
 

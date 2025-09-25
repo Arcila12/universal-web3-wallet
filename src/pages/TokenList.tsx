@@ -4,6 +4,7 @@ import { PlusOutlined, DeleteOutlined, ReloadOutlined, EyeInvisibleOutlined, Eye
 import { useI18n } from '../hooks/useI18n'
 import { Token } from '../wallet/TokenManager'
 import AddTokenModal from './AddTokenModal'
+import { formatUnits } from 'ethers'
 
 const { Title, Text } = Typography
 
@@ -33,18 +34,40 @@ const TokenList: React.FC<TokenListProps> = ({
   const [hideZeroBalance, setHideZeroBalance] = useState(false)
   const [refreshingTokens, setRefreshingTokens] = useState<Set<string>>(new Set())
   const [refreshingAll, setRefreshingAll] = useState(false)
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
   const tokenBalanceIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // 当账户地址或链ID变化时重置初始加载状态
+  useEffect(() => {
+    setIsInitialLoad(true);
+  }, [accountAddress, chainId]);
+
+  // 创建稳定的刷新函数引用
+  const refreshBalancesRef = useRef(onRefreshAllBalances);
+  refreshBalancesRef.current = onRefreshAllBalances;
 
   // 设置代币余额轮询
   useEffect(() => {
     if (tokens.length > 0) {
-      // 立即刷新一次余额
-      onRefreshAllBalances();
+      // 首次加载时立即刷新余额
+      if (isInitialLoad) {
+        refreshBalancesRef.current().finally(() => {
+          setIsInitialLoad(false);
+        });
+      } else {
+        // 非首次加载（如切换账户/网络）时也刷新，但不显示loading
+        refreshBalancesRef.current();
+      }
 
-      // 启动轮询 - 每6秒刷新一次余额
+      // 启动轮询 - 每6秒刷新一次余额（静默刷新）
       tokenBalanceIntervalRef.current = setInterval(() => {
-        onRefreshAllBalances();
+        refreshBalancesRef.current();
       }, 6000);
+    } else {
+      // 没有代币时也标记为已完成初始加载
+      if (isInitialLoad) {
+        setIsInitialLoad(false);
+      }
     }
 
     // 清理轮询
@@ -54,17 +77,19 @@ const TokenList: React.FC<TokenListProps> = ({
         tokenBalanceIntervalRef.current = null;
       }
     };
-  }, [tokens.length, accountAddress, chainId, onRefreshAllBalances]);
+  }, [tokens.length, accountAddress, chainId]);
 
   // 监听账户变更和网络变更事件
   useEffect(() => {
     const handleAccountChange = () => {
+      setIsInitialLoad(true); // 重置初始加载状态
       if (tokens.length > 0) {
         onRefreshAllBalances();
       }
     };
 
     const handleNetworkChange = () => {
+      setIsInitialLoad(true); // 重置初始加载状态
       if (tokens.length > 0) {
         onRefreshAllBalances();
       }
@@ -141,9 +166,15 @@ const TokenList: React.FC<TokenListProps> = ({
   }
 
   const formatBalance = (balance: string | undefined, decimals: number) => {
-    if (!balance) return '0'
-    const balanceNum = parseFloat(balance) / Math.pow(10, decimals)
-    return balanceNum.toFixed(6).replace(/\.?0+$/, '')
+    if (!balance || balance === '0') return '0'
+
+    try {
+      // 使用ethers的formatUnits来处理大数运算
+      return formatUnits(balance, decimals)
+    } catch (error) {
+      console.error('Error formatting balance:', error, 'balance:', balance, 'decimals:', decimals)
+      return '0'
+    }
   }
 
   return (
@@ -189,7 +220,7 @@ const TokenList: React.FC<TokenListProps> = ({
 
       <Divider style={{ margin: '12px 0' }} />
 
-      {loading ? (
+      {loading && isInitialLoad ? (
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
           <Spin size="large" />
           <div style={{ marginTop: 16 }}>
